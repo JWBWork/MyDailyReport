@@ -1,0 +1,7 @@
+Briefly summarize the work detailed in this commit
+
+message: {message}
+
+{status} {filename}
+patch:
+{patch}

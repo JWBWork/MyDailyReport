@@ -1,0 +1,51 @@
+// .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Quasar",
+            "cwd": "${workspaceFolder}/Front",
+            "runtimeExecutable": "yarn",
+            "runtimeArgs": [
+              "quasar", "dev", "--port", "9000"
+            ],
+            "stopOnEntry": false
+        },
+        {
+            "name": "FastAPI",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/Back",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Back/.venv/bin/python3.11"
+            },
+            "stopOnEntry": false,
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--ssl-keyfile",
+                "keys/localhost.key",
+                "--ssl-certfile",
+                "keys/localhost.crt",
+                "--reload",
+                "--host",
+                "localhost",
+                "--port",
+                "8000"
+            ],
+            "jinja": true
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Quasar + FastAPI",
+            "configurations": [
+                "Quasar",
+                "FastAPI"
+            ],
+            "stopAll": true
+        }
+    ]
+}
