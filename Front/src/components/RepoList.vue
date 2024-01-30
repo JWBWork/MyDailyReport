@@ -1,4 +1,5 @@
 <template>
+
   <q-select padding
     filled
     v-model="repo"
@@ -34,12 +35,27 @@ export default defineComponent({
   name: 'RepoList',
   exposes: ['repo'],
   props: {
-    repos: {
-      type: Array as () => Repo[],
+    github: {
+      type: Github,
       required: true
+    },
+    // repos: {
+    //   type: Array as () => Repo[],
+    //   required: true
+    // },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   components: {
+  },
+  data () {
+    return {
+      // repo: null as Repo | null,
+      repos: [] as Repo[],
+    }
   },
   setup() {
     const repo = ref<Repo | null>(null);
@@ -47,6 +63,17 @@ export default defineComponent({
     return {
       repo,
     };
+  },
+  watch: {
+    github: {
+      immediate: true,
+      deep: true,
+      async handler() {
+        if (this.github.authorized && this.repos.length == 0) {
+          this.repos = await this.github.getRepos();
+        }
+      },
+    },
   },
 })
 </script>

@@ -100,6 +100,9 @@ class Repo:
     def json(self):
         return self.__dict__
 
+class GithubUserModel(BaseModel):
+    login: str
+
 class GithubTokenModel(BaseModel):
     access_token: Optional[str] = None
     expires_in: Optional[int] = None
@@ -186,6 +189,14 @@ class GithubIntegration(Integration):
             self.update_access_token_data(**data)
             return response
 
+    def signout(self):
+        self.access_token = None
+        self.expires_in = None
+        self.refresh_token = None
+        self.refresh_token_expires_in = None
+        self.token_type = None
+        self.scope = None
+
     def get_user(self):
         response = self.get("user")
         return response.json()
@@ -216,6 +227,9 @@ class GithubSummary(Summary):
         COMMIT_FILE = "git_commit_file"
 
     def summarize_commit_files(self, commit: Commit) -> list[str]:
+        _filter_out = (
+            ".csv", ".xlsx", ".png", ".pdf", ".docx", ".doc"
+        )
         summaries = [
             self.get_summary(
                 self.Templates.COMMIT_FILE, 
@@ -224,5 +238,9 @@ class GithubSummary(Summary):
                 filename = file.filename,
                 patch = file.patch,
             ) for file in commit.files
+            if not any(
+                file.filename.lower().endswith(ext) 
+                for ext in _filter_out
+            )
         ]
         return summaries

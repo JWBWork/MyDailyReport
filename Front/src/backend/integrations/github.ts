@@ -179,6 +179,20 @@ export class Github implements Integration {
       `&state=${localStorage.getItem(this.stateKey)}`;
   }
 
+  async logout() {
+    console.log(`logging ${this.login.value} out of github`);
+    client.post(
+      '/authorize/github/logout',
+      {
+        login: this.login.value
+      }
+    )
+    this.clearToken();
+    this.authorized = false;
+    this.login.value = null;
+    this.avatar_url.value = null;
+  }
+
   async processGithubCode(code: string) {
     await client
       .get('/authorize/github', {
@@ -208,6 +222,7 @@ export class Github implements Integration {
           this.authorized = false;
           error.handleGlobally && error.handleGlobally();
         }
+        throw error;
       });
   }
 

@@ -8,4 +8,5 @@ export interface Integration {
   // auth(): any;
   initAuth(): any;
   grabParams(): any;
+  logout(): any;
 }

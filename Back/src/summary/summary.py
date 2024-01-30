@@ -1,6 +1,8 @@
 from pathlib import Path
 from dataclasses import dataclass
 import openai
+from datetime import datetime
+from loguru import logger
 
 # @dataclass
 class Summary:
@@ -18,7 +20,18 @@ class Summary:
 
     def get_summary(self, template: str, **kwargs):
         prompt = self.render_template(template, **kwargs)
-        return openai.ChatCompletion.create(
+        logger.info(f"Prompt:\n\n{prompt}")
+
+        # TODO put behind env variable
+        prompt_history_dir = Path().resolve() / 'prompt_history'
+        prompt_history_dir.mkdir(exist_ok=True)
+        prompt_history_path = prompt_history_dir / f"{datetime.now().isoformat()}.txt"
+        with open(prompt_history_path, "w+") as prompt_history_file:
+            prompt_history_file.write(prompt)
+
+        r = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}]
-        ).choices[0]['message']['content']
+        )
+
+        return r.choices[0]['message']['content']

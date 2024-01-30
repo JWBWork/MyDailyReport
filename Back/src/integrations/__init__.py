@@ -1,1 +1,1 @@
-from .github.github import GithubIntegration, GithubSummary, GithubTokenModel
+from .github.github import GithubIntegration, GithubSummary, GithubTokenModel, GithubUserModel

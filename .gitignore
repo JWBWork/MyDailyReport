@@ -297,3 +297,6 @@
 *.pem
 *.crt
 *.key
+*/keys/
+
+Back/prompt_history/

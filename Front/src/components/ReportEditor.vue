@@ -4,6 +4,7 @@
     :placeholder="placeholder"
     min-height="5rem"
     height="85vh"
+    :readonly="readonly"
   />
 </template>
 
@@ -11,7 +12,11 @@
 import { defineComponent } from 'vue'
 export default defineComponent({
   props: {
-    new_summary: String
+    new_summary: String,
+    readonly: {
+      type: Boolean,
+      default: false
+    }
   },
   setup() {
     const editor = ''

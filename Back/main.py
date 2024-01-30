@@ -7,11 +7,13 @@ from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.datastructures import QueryParams
 from fastapi.middleware.cors import CORSMiddleware
-from src.integrations import GithubIntegration, GithubSummary, GithubTokenModel
+from src.integrations import GithubIntegration, GithubSummary, GithubTokenModel, GithubUserModel
 from src.integrations.github.exceptions import GithubException, GithubBadRefreshToken
 from pprint import pformat
 
 from loguru import logger
+
+logger.add("logs/{time}.log", rotation="1 day", retention="10 days", level="INFO")
 
 app = FastAPI(debug=True)
 app.add_middleware(
@@ -30,6 +32,7 @@ github_summary = GithubSummary()
 
 @app.get("/authorize/github")
 async def github_auth(code: str):
+    logger.info(f"Authorizing {code=}")
     access_token = github_integration.auth(code)
     # user = github_integration.get("user").json()
     logger.info(f"User: {github_integration.get_user()}")
@@ -43,8 +46,16 @@ async def github_refresh_access_token(refresh_token: str):
 @app.post("/authorize/github/update")
 async def github_update_access_token(token_data: GithubTokenModel):
     logger.info(f"Updating access token for {token_data=}")
-    return github_integration.update_access_token_data(**token_data.model_dump())
+    r = github_integration.update_access_token_data(
+        **token_data.model_dump()
+    )
+    logger.info(f"Updated access token for {token_data=}")
+    return  r
 
+@app.post("/authorize/github/logout")
+async def github_signout(user: GithubUserModel):
+    logger.info(f"Signing out for {user=}")
+    github_integration.signout()
 
 @app.get("/summary/github/user")
 async def get_github_repos():

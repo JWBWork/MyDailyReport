@@ -11,7 +11,7 @@
             "runtimeArgs": [
               "quasar", "dev", "--port", "9000"
             ],
-            "stopOnEntry": false
+            "stopOnEntry": false,
         },
         {
             "name": "FastAPI",
@@ -26,9 +26,9 @@
             "args": [
                 "main:app",
                 "--ssl-keyfile",
-                "keys/localhost.key",
+                "keys/localhost.key.pem",
                 "--ssl-certfile",
-                "keys/localhost.crt",
+                "keys/localhost.cert.pem",
                 "--reload",
                 "--host",
                 "localhost",

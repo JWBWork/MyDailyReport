@@ -1,5 +1,12 @@
 <template>
-  <q-list padding dense v-if="commits.length != null">
+  <div v-if="loading" class="q-pa-md">
+    <div class="q-gutter-md row">
+      <q-spinner class="q-ma-auto"
+          size="2em"
+          :thickness="5"/>
+    </div>
+  </div>
+  <q-list padding dense v-else-if="commits.length != null">
     <commit-list-item
       v-for="commit in commits"
       v-bind:key="commit.sha"
@@ -31,27 +38,14 @@ export default defineComponent({
     repo: {
       type: Object as () => Repo | null,
       required: false
-    }
+    },
   },
   data () {
     return {
       commits: ref([] as Commit[]),
       selectedCommits: ref([] as Commit[]),
+      loading: false,
     }
-  },
-  computed: {
-    // selectedCommits() {
-    //   const commits = (this.$refs.commit as typeof CommitListItem[])
-    //   if (commits) {
-    //     return commits.filter((commit) => {
-    //       return commit.selected
-    //     }).map((commit) => {
-    //       return commit.commit
-    //     })
-    //   } else {
-    //     return []
-    //   }
-    // }
   },
   watch: {
     repo: {
@@ -59,7 +53,9 @@ export default defineComponent({
       async handler() {
         this.selectedCommits = []
         if (this.repo != null) {
+          this.loading = true
           this.commits = await this.github.getCommits(this.repo)
+          this.loading = false
         } else {
           this.commits = []
         }

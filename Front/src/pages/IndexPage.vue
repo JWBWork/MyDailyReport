@@ -1,128 +1,67 @@
 <template>
   <q-page class="row justify-evenly q-pa-md">
-    <div class="col-5 q-pa-sm">
-      <integration-list :integrations="integrations" />
-
-      <!-- TODO: apply date range for query  -->
-      <!-- <report-calendar /> -->
-
-      <!-- TODO: Some intermediate element to select integration specific elements -->
-      <div v-show="githubAuthorized">
-        <repo-list :repos="repos" ref="repoSelect" />
-        <commit-list
-          :github="github"
-          :repo="selectedRepo"
-          v-show="selectedRepo != null"
-          @updatedCommitSelection="selectedCommits"
-          ref="commitList"
-        />
+    <div class="col-10">
+      <div class="column items-center">
+        <h1>Welcome to MyDaily.Report</h1>
+        <p>Unleash the Power of Your Productivity with Intelligent Summaries</p>
+        <h2>Your Day, Distilled.</h2>
+        <p>MyDaily.Report is not just another productivity tool; it's your personalized daily briefing, powered by cutting-edge language models. Transform your scattered workday data—from Git commits and emails to Slack messages—into insightful, actionable summaries.</p>
+        <h2>How it Works</h2>
+        <ol>
+          <li>Connect seamlessly: Link your Git, email, and Slack accounts effortlessly. MyDaily.Report takes care of the rest.</li>
+          <li>Intelligent Processing: Our advanced Language Model scans through your daily activities, identifying key patterns and significant events.</li>
+          <li>Summaries that Matter: Receive concise, easy-to-digest summaries of your workday, highlighting accomplishments, potential roadblocks, and key interactions.</li>
+        </ol>
+        <h2>Why MyDaily.Report?</h2>
+        <ul>
+          <li>Effortless Insights: No more sifting through endless messages or commit logs. Get the highlights that matter, instantly.</li>
+          <li>Data-Driven Productivity: Leverage AI to understand your work patterns, identify bottlenecks, and enhance your efficiency over time.</li>
+          <li>Stay in the Loop: Be on top of your day without drowning in details. MyDaily.Report keeps you informed without overwhelming you.</li>
+        </ul>
+        <h3>Join Thousands Who've Elevated Their Workday</h3>
+        <p>Ready to experience a smarter, more focused work life? Join the ranks of professionals who trust MyDaily.Report to streamline their daily workflow.</p>
         <q-btn
-          icon="history_edu"
-          label="Summarize"
-          class="full-width"
-          @click="requestSummary()"
-          :disabled="!commitsSelected"
-        />
+          label="Start Reporting"
+          color="primary"
+          size="lg"
+          to="/reports"
+          />
+        <br/>
+        <p class="small-print">Note: MyDaily.Report respects your privacy. We prioritize security and data protection, ensuring your information remains confidential.</p>
       </div>
     </div>
-    <div class="col q-pa-sm">
-      <report-editor :new_summary="new_summary || ''" />
-    </div>
-  </q-page>
+</q-page>
 </template>
 
 <script lang="ts">
-import ReportCalendar from 'components/ReportCalendar.vue';
-import IntegrationList from 'components/IntegrationList.vue';
-import ReportEditor from 'components/ReportEditor.vue';
-import RepoList from 'components/RepoList.vue';
-import CommitList from 'components/CommitList.vue';
-import { Integration } from 'components/models';
-import { Github, Repo, Commit } from '../backend/integrations/github';
-import { ref } from 'vue';
 
 export default {
   name: 'IndexPage',
   components: {
-    // ReportCalendar,
-    IntegrationList,
-    ReportEditor,
-    RepoList,
-    CommitList,
   },
   setup() {
-    const github = new Github();
-    const repos = ref(github.repos);
-
-    var integrations = [github];
     return {
-      github,
-      integrations,
-      repos,
     };
   },
   data() {
     return {
-      mounted: false,
-      githubAuthorized: false,
-      commitsSelected: false,
-      new_summary: null,
     };
   },
   async mounted() {
-    this.mounted = true;
-    // this.repos = await this.github.getRepos();
+    return
   },
   computed: {
-    selectedRepo() {
-      if (!this.mounted) {
-        return null;
-      } else {
-        var repoList = this.$refs.repoSelect as typeof RepoList;
-        if (repoList == null) {
-          return null;
-        } else {
-          return repoList.repo;
-        }
-      }
-    },
-    noSelectedCommits() {
-      const commitList = this.$refs.commitList as typeof CommitList;
-      const result = !commitList || commitList.selectedCommits.length === 0;
-      console.log('result', result);
-      return result;
-    },
   },
   watch: {
-    github: {
-      immediate: true,
-      deep: true,
-      async handler() {
-        if (this.github.authorized && this.repos.length == 0) {
-          this.repos = await this.github.getRepos();
-        }
-        this.githubAuthorized = this.github.authorized;
-      },
-    },
   },
   methods: {
-    selectedCommits(selectedCommits: Commit[]) {
-      if (selectedCommits) {
-        this.commitsSelected = selectedCommits.length > 0;
-      }
-    },
-    async requestSummary() {
-      if (this.selectedRepo != null) {
-        const commitList = this.$refs.commitList as typeof CommitList;
-        if (commitList) {
-          console.log('selectedCommits', commitList.selectedCommits);
-          const response = await this.github.getSummary(
-            this.selectedRepo, commitList.selectedCommits
-          );
-          this.new_summary = response.summary;
-        }
-      }
-    },
   },
 };
 </script>
+
+<style>
+.small-print {
+  font-size: 0.8em;
+  color: grey;
+}
+</style>

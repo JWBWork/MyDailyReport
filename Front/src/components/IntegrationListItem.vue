@@ -22,9 +22,14 @@
     </q-item-section>
 
     <q-item-section side>
+      <q-btn
+        v-if="authorized"
+        icon="logout"
+        @click.stop="logout()"
+      />
       <q-badge
         color="red"
-        v-if="!authorized"
+        v-else
       >
         <q-icon
           name="warning"
@@ -38,7 +43,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { Integration } from 'components/models';
-import { callbackify } from 'util';
+// import { callbackify } from 'util';
+
 export default defineComponent({
   props: {
     integration: {
@@ -67,6 +73,10 @@ export default defineComponent({
   methods: {
     initAuth() {
       this.integration.initAuth()
+    },
+    logout() {
+      console.log('logout')
+      this.integration.logout()
     }
   },
   watch: {
