@@ -5,3 +5,5 @@ message: {message}
 {status} {filename}
 patch:
 {patch}
+
+Just describe the work done in a first person perspective, don't mention it's a commit

@@ -1,8 +1,8 @@
 <template>
   <q-page class="row justify-evenly q-pa-md">
-    <div class="col-10">
+    <div class="col-7 items-center">
+      <h1>Welcome to MyDaily.Report</h1>
       <div class="column items-center">
-        <h1>Welcome to MyDaily.Report</h1>
         <p>Unleash the Power of Your Productivity with Intelligent Summaries</p>
         <h2>Your Day, Distilled.</h2>
         <p>MyDaily.Report is not just another productivity tool; it's your personalized daily briefing, powered by cutting-edge language models. Transform your scattered workday data—from Git commits and emails to Slack messages—into insightful, actionable summaries.</p>

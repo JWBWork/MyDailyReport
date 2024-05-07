@@ -22,7 +22,7 @@ class Summary:
         prompt = self.render_template(template, **kwargs)
         logger.info(f"Prompt:\n\n{prompt}")
 
-        # TODO put behind env variable
+        # TODO put logging path behind env variable?
         prompt_history_dir = Path().resolve() / 'prompt_history'
         prompt_history_dir.mkdir(exist_ok=True)
         prompt_history_path = prompt_history_dir / f"{datetime.now().isoformat()}.txt"

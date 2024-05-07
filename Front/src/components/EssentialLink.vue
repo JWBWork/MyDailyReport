@@ -1,14 +1,8 @@
 <template>
-  <!-- <q-item
-    clickable
-    tag="a"
-    target="_blank"
-    :href="link"
-  > -->
   <q-item
     clickable
     target="_blank"
-    @click="$router.push(link)"
+    @click="goToLink"
   >
     <q-item-section
       v-if="icon"
@@ -48,6 +42,15 @@ export default defineComponent({
     icon: {
       type: String,
       default: ''
+    }
+  },
+  methods: {
+    goToLink() {
+      if (this.link.startsWith('http')) {
+        window.open(this.link, '_blank');
+      } else {
+        this.$router.push(this.link);
+      }
     }
   }
 });

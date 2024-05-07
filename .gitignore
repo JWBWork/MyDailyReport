@@ -300,3 +300,7 @@
 */keys/
 
 Back/prompt_history/
+Back/test.db
+
+node_modules/
+.vscode/

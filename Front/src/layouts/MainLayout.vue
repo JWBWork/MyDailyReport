@@ -5,7 +5,6 @@
         <q-btn
           flat
           dense
-          round
           icon="menu"
           aria-label="Menu"
           @click="toggleLeftDrawer"
@@ -20,8 +19,8 @@
     </q-header>
 
     <q-drawer
+      elevated
       v-model="leftDrawerOpen"
-      show-if-above
       bordered
       persistent
     >
@@ -39,7 +38,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
@@ -64,8 +63,20 @@ const linksList = [
   {
     title: 'Github',
     caption: 'github.com/quasarframework',
-    icon: 'code',
+    icon: 'star',
     link: 'https://github.com/quasarframework'
+  },
+  {
+    title: 'User',
+    caption: 'user page',
+    icon: 'face',
+    link: '/user'
+  },
+  {
+    title: '404',
+    caption: 'test 404',
+    icon: 'question_mark',
+    link: '/asdfasdfasd'
   }
 ];
 
@@ -77,16 +88,19 @@ export default defineComponent({
   },
 
   setup() {
-    let leftDrawerOpen = ref(false)
+    const drawerState = window.localStorage.getItem('drawerState');
+    const parsedDrawerState = drawerState !== null ? JSON.parse(JSON.parse(drawerState)) : false;
+    let leftDrawerOpen = ref(parsedDrawerState);
 
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value
+        localStorage.setItem('drawerState', String(leftDrawerOpen.value))
       }
     }
-  }
+  },
 });
 </script>
 

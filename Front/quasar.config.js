@@ -30,8 +30,9 @@ module.exports = configure(function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      
-      
+      // 'google-auth',
+      'user-auth',
+      'reports',
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -55,6 +56,19 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
+      viteVuePluginOptions: { //You may have to add or uncomment this option.
+        template: {
+          compilerOptions: {
+            isCustomElement: (tag) => tag.startsWith('stripe-')
+          }
+        }
+      },
+
+      env: {
+        GOOGLE_CLIENT_ID: '418573552659-acca314jqjlo1a7030fo5phabs1u26m3.apps.googleusercontent.com',
+        STRIPE_PUBLISHABLE_KEY: 'pk_test_51OzhF0A8jMGv8c7QGk8iRNGPjBcYNfUVEfcC5skH0G4wghHbw6mdijrgI7Ga705LsG5JWp52EV4SnkKnBFN8iTHA00UlUQfOb0'
+      },
+
       target: {
         browser: [ 'es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1' ],
         node: 'node16'
@@ -69,7 +83,6 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -79,7 +92,7 @@ module.exports = configure(function (/* ctx */) {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
-      
+
       // vitePlugins: [
       //   [ 'package-name', { ..options.. } ]
       // ]
@@ -107,7 +120,9 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify',
+      ]
     },
 
     // animations: 'all', // --- includes all animations

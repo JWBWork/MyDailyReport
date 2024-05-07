@@ -1,5 +1,10 @@
 {
   "devDependencies": {
     "crypto": "^1.0.1"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^3.1.0",
+    "@vue-stripe/vue-stripe": "^4.5.0",
+    "vue3-google-login": "^2.0.25"
   }
 }

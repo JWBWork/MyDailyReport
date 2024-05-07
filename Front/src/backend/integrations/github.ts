@@ -2,8 +2,9 @@ import { client } from '../api';
 import { Integration } from 'components/models';
 import randomString from 'random-string';
 import { ref } from 'vue';
-import axios from 'axios';
 import qs from 'qs';
+import { userAuth } from 'boot/user-auth';
+import { Report } from 'boot/reports';
 
 export class CommitFile {
   public filename: string;
@@ -137,7 +138,7 @@ export class Github implements Integration {
 
   async refreshToken(token: any) {
     const new_token = await client
-      .get('/authorize/github/refresh', {
+      .get('/integrations/github/refresh', {
         params: {
           refresh_token: token.refresh_token,
         },
@@ -182,7 +183,7 @@ export class Github implements Integration {
   async logout() {
     console.log(`logging ${this.login.value} out of github`);
     client.post(
-      '/authorize/github/logout',
+      '/integrations/github/logout',
       {
         login: this.login.value
       }
@@ -195,7 +196,7 @@ export class Github implements Integration {
 
   async processGithubCode(code: string) {
     await client
-      .get('/authorize/github', {
+      .get('/integrations/github', {
         params: {
           code: code,
         },
@@ -229,7 +230,7 @@ export class Github implements Integration {
   async updateBackendToken(token: any) {
     console.log('updating backend token', token);
     await client
-      .post('/authorize/github/update', token)
+      .post('/integrations/github/update', token)
       .then((resp) => {
         console.log('token updated successfully', resp);
       })
@@ -240,7 +241,7 @@ export class Github implements Integration {
 
   async getUser() {
     const user = await client
-      .get('/summary/github/user')
+      .get('/integrations/github/user')
       .then((resp) => {
         return resp.data;
       })
@@ -275,7 +276,7 @@ export class Github implements Integration {
       throw new Error('No token found');
     }
     const repos = await client
-      .get('/summary/github/repos')
+      .get('/integrations/github/repos')
       .then((resp) => {
         return resp.data;
       })
@@ -293,7 +294,7 @@ export class Github implements Integration {
       throw new Error('No token found');
     }
     const _commits = await client
-      .get(`/summary/github/repos/${repo.name}/commits`, {
+      .get(`/integrations/github/repos/${repo.name}/commits`, {
         params: {
           // access_token: token.access_token,
           owner: this.login.value,
@@ -312,7 +313,7 @@ export class Github implements Integration {
     return repo.commits
   }
 
-  async getSummary(repo: Repo, commits: Commit[])  {
+  async getReport(repo: Repo, commits: Commit[])  {
     const token = this.getToken();
     if (!token) {
       throw new Error('No token found');
@@ -321,10 +322,14 @@ export class Github implements Integration {
       return commit.sha;
     });
     console.log('requesting summary for commits:', commit_shas);
-    const summary = await client
-      .get(`/summary/github/${this.login.value}/${repo.name}`, {
+    // TODO: remove client with the user auth class? or move this to reports_api?
+    return await client
+      .get(`/integrations/github/report/${this.login.value}/${repo.name}`, {
         params: {
           commit_shas: commit_shas,
+        },
+        headers: {
+          Authorization: `Bearer ${userAuth.accessToken.get()}`,
         },
         paramsSerializer: params => {
           return qs.stringify(params, { arrayFormat: 'repeat'})
@@ -332,11 +337,11 @@ export class Github implements Integration {
       })
       .then((resp) => {
         console.log('summary response:', resp);
-        return resp.data;
+        return new Report(null, resp.data.report.name, resp.data.report.content);
       })
       .catch((error) => {
-        throw new Error(error);
+        // UI should respond to this error
+        throw error;
       });
-    return summary
   }
 }

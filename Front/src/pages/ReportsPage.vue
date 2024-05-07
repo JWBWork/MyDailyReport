@@ -1,6 +1,7 @@
 <template>
-  <q-page class="row justify-evenly q-pa-md">
-    <div class="col-5 q-pa-sm">
+  <q-page class="row justify-center q-pa-md">
+    <!-- <div class="col-8"> -->
+    <div class="col-3 q-pa-sm">
       <integration-list :integrations="integrations" />
 
       <!-- TODO: apply date range for query  -->
@@ -9,11 +10,7 @@
       <!-- TODO: Some intermediate element to select integration specific elements -->
       <div v-show="githubAuthorized">
         <div class="col-10">
-          <repo-list
-            :github="github"
-            :repos="repos"
-            ref="repoSelect"
-          />
+          <repo-list :github="github" :repos="repos" ref="repoSelect" />
           <commit-list
             :github="github"
             :repo="selectedRepo"
@@ -27,18 +24,21 @@
             icon="history_edu"
             :loading="awaiting_summary"
             label="Summarize"
-            class="full-width vertical-bottom	"
+            class="full-width vertical-bottom"
             @click="requestSummary()"
             :disabled="!commitsSelected || awaiting_summary"
           />
         </div>
       </div>
     </div>
-    <div class="col q-pa-sm">
+    <div class="col-5 q-pa-sm">
+      <div class="row">
+        <ReportList ref="reportList" @saveReport="saveReport" @selectReport="selectReport"/>
+      </div>
       <report-editor
-        :new_summary="new_summary || ''"
+        ref="reportEditor"
         :readonly="awaiting_summary"
-        />
+      />
     </div>
   </q-page>
 </template>
@@ -49,10 +49,11 @@ import IntegrationList from 'components/IntegrationList.vue';
 import ReportEditor from 'components/ReportEditor.vue';
 import RepoList from 'components/RepoList.vue';
 import CommitList from 'components/CommitList.vue';
-// import { Integration } from 'components/models';
-// import { Github, Repo, Commit } from '../backend/integrations/github';
+import ReportList from 'components/ReportList.vue';
 import { Github, Commit } from '../backend/integrations/github';
 import { ref } from 'vue';
+import { userAuth } from 'boot/user-auth';
+import { Report, reports_api } from 'boot/reports';
 
 export default {
   name: 'IndexPage',
@@ -62,6 +63,7 @@ export default {
     ReportEditor,
     RepoList,
     CommitList,
+    ReportList,
   },
   setup() {
     const github = new Github();
@@ -79,13 +81,11 @@ export default {
       mounted: false,
       githubAuthorized: false,
       commitsSelected: false,
-      new_summary: null,
       awaiting_summary: false,
     };
   },
   async mounted() {
     this.mounted = true;
-    // this.repos = await this.github.getRepos();
   },
   computed: {
     selectedRepo() {
@@ -112,9 +112,6 @@ export default {
       immediate: true,
       deep: true,
       async handler() {
-        // if (this.github.authorized && this.repos.length == 0) {
-        //   this.repos = await this.github.getRepos();
-        // }
         this.githubAuthorized = this.github.authorized;
       },
     },
@@ -131,20 +128,48 @@ export default {
         if (commitList) {
           this.awaiting_summary = true;
           console.log('selectedCommits', commitList.selectedCommits);
-          await this.github.getSummary(
-            this.selectedRepo, commitList.selectedCommits
-          )
-          .then((response) => {
-            console.log('response', response);
-            this.new_summary = response.summary;
-            this.awaiting_summary = false;
-          })
-          .catch((e) => {
-            console.log('error', e);
-            this.awaiting_summary = false;
-          })
+          await this.github
+            .getReport(this.selectedRepo, commitList.selectedCommits)
+            .then((report: Report) => {
+              console.log('response', report);
+              const report_list = this.$refs.reportList as any;
+              report_list.setReport(report);
+              this.updateEditorContent(report.content);
+              this.awaiting_summary = false;
+            })
+            .catch((e) => {
+              console.log(e);
+              this.awaiting_summary = false;
+              if (e.response.status == 401) {
+                userAuth.LogoutUser();
+                this.$q.notify({
+                  type: 'negative',
+                  message: 'Unauthorized - Please log in to generate reports!',
+                });
+                this.$router.push({ path: '/user' });
+              } else {
+                this.$q.notify({
+                  type: 'negative',
+                  message: 'Error',
+                });
+              }
+            });
         }
       }
+    },
+    async saveReport(report_name: string) {
+      const editor_element = this.$refs.reportEditor as any;
+      const report_list = this.$refs.reportList as any;
+      await reports_api.saveReport(report_name, editor_element.content);
+      report_list.refreshReports();
+    },
+    async selectReport(report: Report) {
+      this.updateEditorContent(report.content);
+    },
+    updateEditorContent(content: string) {
+      const editor_element = this.$refs.reportEditor as any;
+      editor_element.content = content.replace(/(?:\r\n|\r|\n)/g, '<br>');;
+      editor_element.$forceUpdate();
     },
   },
 };
