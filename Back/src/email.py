@@ -4,7 +4,7 @@ from sendgrid.helpers.mail import Mail
 from loguru import logger
 
 def send_email(subject: str, email_address: str, token: str):
-    verification_href = f"https://localhost:9000/user?verification_token={token}"
+    verification_href = f"https://localhost:9000/user?verification-token={token}"
     message = Mail(
         from_email='verification@mydaily.report',
         to_emails=email_address,

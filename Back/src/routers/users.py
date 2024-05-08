@@ -63,17 +63,8 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     verification_token_secret = SECRET
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user} has registered.")
-        token_data = {
-            "user_id": str(user.id),
-            "email": user.email,
-            "aud": self.verification_token_audience,
-        }
-        token = generate_jwt(
-            token_data, self.verification_token_secret, self.verification_token_lifetime_seconds
-        )
-        email_response = send_email("MyDailyReport Verification", user.email, token)
-        logger.info(f"Email sent to {user.email=} with {email_response=}")
+        response = await self.request_verify(user=user)
+        return response
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
@@ -83,7 +74,8 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        send_email("MyDailyReport Verification", user.email, token)
+        return {"message": "Verification email sent"}
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
