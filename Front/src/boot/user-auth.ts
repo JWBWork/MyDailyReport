@@ -10,15 +10,17 @@ class UserAuth {
   public userEmail = new LocalStoreAttribute('userEmail', '');
 
   constructor() {
-    this.getUser().catch((error) => {
-      console.log('UserAuth constructor error', error);
-      if (error.response.status === 401) {
-        this.browserLogout();
-      }
-    }).then((response) => {
-      console.log('UserAuth constructor user', response);
-      return
-    });
+    if (this.accessToken.get()) {
+      this.getUser().catch((error) => {
+        console.log('UserAuth constructor error', error);
+        if (error.response.status === 401) {
+          this.browserLogout();
+        }
+      }).then((response) => {
+        console.log('UserAuth constructor user', response);
+        return
+      });
+    }
   }
 
   _set_headers(config = {}) {
@@ -57,6 +59,9 @@ class UserAuth {
     return await this.post('/auth/register', {
       email: email,
       password: password,
+    }).then((resp) => {
+      console.log('register response', resp);
+      return resp;
     });
   }
 
