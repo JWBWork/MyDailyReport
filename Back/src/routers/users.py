@@ -63,8 +63,12 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     verification_token_secret = SECRET
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        response = await self.request_verify(user=user)
-        return response
+        # TODO: update launch.json to include env var for sending verification email
+        if os.environ.get("SEND_VERIFICATION_EMAIL", "false") == "true":
+            response = await self.request_verify(user=user)
+            return response
+        else:
+            return {"message": "User registered successfully"}
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
