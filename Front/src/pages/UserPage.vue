@@ -8,6 +8,7 @@
         </q-tabs>
 
         <q-input v-model="email" class="q-ma-sm" outlined label="Email" />
+        <!-- TODO: add password verification if registering -->
         <q-input
           v-model="password"
           class="q-ma-sm"
@@ -24,6 +25,7 @@
           </template>
         </q-input>
         <q-tab-panels v-model="tab">
+          <!-- TODO: submit when pressing enter -->
           <q-tab-panel name="register">
             <q-form
               @submit="RegisterSubmit"
@@ -116,7 +118,7 @@
 </template>
 
 <script lang="ts">
-import { client } from '../backend/api';
+// import { client } from '../backend/api';
 import { userAuth } from 'boot/user-auth';
 import { ref } from 'vue';
 
@@ -140,12 +142,20 @@ export default {
   },
   data() {
     const urlParams = new URLSearchParams(window.location.search);
+
     const checkoutSessionId = urlParams.get('checkout-session-id');
     if (checkoutSessionId) {
       const response = this.processStripeCheckout(checkoutSessionId);
       console.log('checkoutSessionId: ', checkoutSessionId, 'response: ', response);
       urlParams.delete('checkout-session-id');
       window.history.replaceState({}, '', '?' + urlParams.toString());
+    }
+
+    const verificationToken = urlParams.get('verification-token');
+    if (verificationToken) {
+      userAuth.verifyUser(verificationToken);
+      // urlParams.delete('verification-token');
+      // window.history.replaceState({}, '', '?' + urlParams.toString());
     }
 
     return {

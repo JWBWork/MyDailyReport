@@ -1,4 +1,4 @@
-import { boot } from 'quasar/wrappers';
+// import { boot } from 'quasar/wrappers';
 import { client } from 'src/backend/api';
 import { LocalStoreAttribute } from 'src/backend/local-store-attr';
 
@@ -98,6 +98,19 @@ class UserAuth {
   async browserLogout() {
     this.authenticated.set(false);
     this.accessToken.set('');
+  }
+
+  async verifyUser(token: string) {
+    return await this.post(
+      '/auth/verify',
+      { token: token }
+    ).then((resp) => {
+      console.log('verification response', resp);
+      return resp;
+    }).catch((error) => {
+      console.log('verification error', error);
+      return error;
+    });
   }
 }
 
