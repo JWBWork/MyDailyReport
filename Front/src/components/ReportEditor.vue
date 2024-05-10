@@ -2,8 +2,6 @@
   <q-editor
     v-model="content"
     :placeholder="placeholder"
-    min-height="5rem"
-    height="85vh"
     :readonly="readonly"
     :content-class="{'line-break': 'pre',}"
   />

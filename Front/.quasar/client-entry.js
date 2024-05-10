@@ -156,7 +156,9 @@ createQuasarApp(createApp, quasarUserOptions)
       
       import('boot/user-auth'),
       
-      import('boot/reports')
+      import('boot/reports'),
+      
+      import('boot/tokens')
       
     ]).then(bootFiles => {
       const boot = mapFn(bootFiles).filter(entry => typeof entry === 'function')

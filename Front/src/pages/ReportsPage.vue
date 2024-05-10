@@ -1,44 +1,44 @@
 <template>
-  <q-page class="row justify-center q-pa-md">
-    <!-- <div class="col-8"> -->
-    <div class="col-3 q-pa-sm">
-      <integration-list :integrations="integrations" />
+  <q-page>
+    <div class="row justify-center">
+      <div class="col-3 q-py-sm" style="height: 85vh;">
+        <integration-list :integrations="integrations" />
 
-      <!-- TODO: apply date range for query  -->
-      <!-- <report-calendar /> -->
+        <!-- TODO: apply date range for query  -->
+        <!-- <report-calendar /> -->
 
-      <!-- TODO: Some intermediate element to select integration specific elements -->
-      <div v-show="githubAuthorized">
-        <div class="col-10">
-          <repo-list :github="github" :repos="repos" ref="repoSelect" />
-          <commit-list
-            :github="github"
-            :repo="selectedRepo"
-            v-show="selectedRepo != null"
-            @updatedCommitSelection="selectedCommits"
-            ref="commitList"
-          />
-        </div>
-        <div class="col">
-          <q-btn
-            icon="history_edu"
-            :loading="awaiting_summary"
-            label="Summarize"
-            class="full-width vertical-bottom"
-            @click="requestSummary()"
-            :disabled="!commitsSelected || awaiting_summary"
-          />
-        </div>
+        <!-- TODO: Some intermediate element to select integration specific elements -->
+        <div v-show="githubAuthorized" class="col full-height">
+          <!-- <div class="col"> -->
+            <repo-list :github="github" :repos="repos" ref="repoSelect" />
+            <commit-list
+              :github="github"
+              :repo="selectedRepo"
+              v-show="selectedRepo != null"
+              @updatedCommitSelection="selectedCommits"
+              ref="commitList"
+            />
+            <q-btn
+              icon="history_edu"
+              :loading="awaiting_summary"
+              label="Summarize"
+              class="full-width"
+              @click="requestSummary()"
+              :disabled="!commitsSelected || awaiting_summary"
+            />
+          </div>
+        <!-- </div> -->
       </div>
-    </div>
-    <div class="col-5 q-pa-sm">
-      <div class="row">
-        <ReportList ref="reportList" @saveReport="saveReport" @selectReport="selectReport"/>
+      <div class="col-5 q-ma-sm" style="height: 85vh;">
+        <div class="row">
+          <ReportList ref="reportList" @saveReport="saveReport" @selectReport="selectReport"/>
+        </div>
+        <report-editor
+          class="full-height"
+          ref="reportEditor"
+          :readonly="awaiting_summary"
+        />
       </div>
-      <report-editor
-        ref="reportEditor"
-        :readonly="awaiting_summary"
-      />
     </div>
   </q-page>
 </template>

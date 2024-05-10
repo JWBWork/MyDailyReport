@@ -20,7 +20,7 @@ class Summary:
 
     def get_summary(self, template: str, **kwargs):
         prompt = self.render_template(template, **kwargs)
-        logger.info(f"Prompt:\n\n{prompt}")
+        # logger.info(f"Prompt:\n\n{prompt}")
 
         # TODO put logging path behind env variable?
         prompt_history_dir = Path().resolve() / 'prompt_history'

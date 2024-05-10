@@ -33,6 +33,7 @@ module.exports = configure(function (/* ctx */) {
       // 'google-auth',
       'user-auth',
       'reports',
+      'tokens'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
@@ -108,7 +109,10 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
       config: {
-        dark: true
+        dark: true,
+        screen: {
+          bodyClasses: true
+        }
       },
 
       // iconSet: 'material-icons', // Quasar icon set
@@ -127,7 +131,7 @@ module.exports = configure(function (/* ctx */) {
       ]
     },
 
-    // animations: 'all', // --- includes all animations
+    animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
     animations: [],
 

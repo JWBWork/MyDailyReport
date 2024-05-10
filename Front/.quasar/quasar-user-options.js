@@ -17,5 +17,5 @@ import {Notify} from 'quasar'
 
 
 
-export default { config: {"dark":true},plugins: {Notify} }
+export default { config: {"dark":true,"screen":{"bodyClasses":true}},plugins: {Notify} }
 

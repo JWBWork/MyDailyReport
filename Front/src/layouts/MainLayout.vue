@@ -19,10 +19,8 @@
     </q-header>
 
     <q-drawer
-      elevated
       v-model="leftDrawerOpen"
-      bordered
-      persistent
+      overlay
     >
       <q-list>
         <q-item-label header>
@@ -35,6 +33,17 @@
           v-bind="link"
         />
       </q-list>
+
+      <div class="absolute" style="top: 8px; right: -17px">
+        <q-btn
+          dense
+          round
+          unelevated
+          color="primary"
+          icon="chevron_left"
+          @click="leftDrawerOpen = false"
+        />
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -88,16 +97,17 @@ export default defineComponent({
   },
 
   setup() {
-    const drawerState = window.localStorage.getItem('drawerState');
-    const parsedDrawerState = drawerState !== null ? JSON.parse(JSON.parse(drawerState)) : false;
-    let leftDrawerOpen = ref(parsedDrawerState);
+    // const drawerState = window.localStorage.getItem('drawerState');
+    // const parsedDrawerState = drawerState !== null ? JSON.parse(JSON.parse(drawerState)) : false;
+    // let leftDrawerOpen = ref(parsedDrawerState);
+    let leftDrawerOpen = ref(false);
 
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value
-        localStorage.setItem('drawerState', String(leftDrawerOpen.value))
+        // localStorage.setItem('drawerState', String(leftDrawerOpen.value))
       }
     }
   },

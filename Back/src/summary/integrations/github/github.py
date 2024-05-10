@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 import openai
+import timeit
 import requests
 from dataclasses import dataclass, fields
 from config import settings
@@ -14,7 +15,11 @@ from src.summary.integrations.github.exceptions import (GithubBadRefreshToken,
 from src.summary.integrations.integration import Integration
 from src.summary.summary import Summary
 
-
+@dataclass
+class CommitAuthor:
+    name: str
+    email: str
+    date: str
 
 @dataclass
 class CommitFile:
@@ -45,6 +50,7 @@ class Commit:
     message: str
     # status: str
     files: Optional[list[CommitFile]] = None
+    author: Optional[CommitAuthor] = None
 
     @classmethod
     def from_json(cls, json):
@@ -56,6 +62,8 @@ class Commit:
         }
         if _kwargs.get("files"):
             _kwargs["files"] = [CommitFile.from_json(file) for file in _kwargs["files"]]
+        if _kwargs.get("author"):
+            _kwargs["author"] = CommitAuthor(**_kwargs["author"])
         return cls(**{k: v for k, v in _kwargs.items() if k in class_fields})
 
     def json(self):
@@ -209,7 +217,10 @@ class GithubIntegration(Integration):
         repo_commits = [Commit.from_json(commit) for commit in repo_commits]
 
         with ThreadPoolExecutor() as executor:
-            repo_commits = executor.map(self.get_repo_commit, *zip(*[(owner, repo_name, commit.sha) for commit in repo_commits]))
+            repo_commits = executor.map(
+                self.get_repo_commit, 
+                *zip(*[(owner, repo_name, commit.sha) for commit in repo_commits])
+            )
             executor.shutdown()
 
         return list(repo_commits)
@@ -226,19 +237,27 @@ class GithubSummary(Summary):
 
     def summarize_commit_files(self, commit: Commit) -> list[str]:
         _filter_out = (
-            ".csv", ".xlsx", ".png", ".pdf", ".docx", ".doc", ".svg", ".gltf", ".gltf.import"
+            ".csv", ".xlsx", ".png", ".pdf", ".docx", ".doc", 
+            ".svg", ".gltf", ".gltf.import", ".sqlite", ".suo"
         )
-        summaries = [
-            self.get_summary(
-                self.Templates.COMMIT_FILE, 
-                message = commit.message,
-                status = file.status,
-                filename = file.filename,
-                patch = file.patch,
-            ) for file in commit.files
+        files_to_summarize = [
+            file for file in commit.files
             if not any(
                 file.filename.lower().endswith(ext) 
                 for ext in _filter_out
             )
         ]
-        return summaries
+
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(
+                    self.get_summary,
+                    self.Templates.COMMIT_FILE, 
+                    message = commit.message,
+                    status = file.status,
+                    filename = file.filename,
+                    patch = file.patch,
+                ) for file in files_to_summarize
+            ]
+            summaries = [future.result() for future in futures]
+        return list(summaries)

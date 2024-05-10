@@ -13,6 +13,7 @@ from src.routers.reports import Report, reports_router
 from src.routers.users import (User, auth_router, current_active_user,
                                user_router)
 from src.routers.subscriptions import subscriptions_router
+from src.routers.tokens import tokens_router
 from src.storage.db import create_db_and_tables
 from src.summary.integrations.github.exceptions import (GithubBadRefreshToken,
                                                         GithubException)
@@ -37,6 +38,7 @@ app.include_router(user_router, prefix="/api")
 app.include_router(github_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")
 app.include_router(subscriptions_router, prefix="/api")
+app.include_router(tokens_router, prefix="/api")
 
 
 @app.get("/authenticated-route")
@@ -81,4 +83,4 @@ async def github_bad_refresh_token_exception_handler(_: Request, exc: GithubExce
                 content={"message": f"Unknown exception {exc}"},
             )
 
-logger.info(pformat(app.routes))
+# logger.info(pformat(app.routes))

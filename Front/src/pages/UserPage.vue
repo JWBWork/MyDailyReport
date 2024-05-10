@@ -1,6 +1,6 @@
 <template>
   <q-page class="col-10 q-pa-md content-center">
-    <div class="row justify-center">
+    <div class="row justify-center no-wrap">
       <div class="col-6" v-if="!authenticated">
         <q-tabs v-model="tab" active-color="primary" indicator-color="primary">
           <q-tab name="login" label="Login" />
@@ -20,12 +20,12 @@
       </div>
 
       <div v-if="authenticated" class="col-7 q-pa-md">
-        <div class="row">
+        <div class="row no-wrap justify-center">
           <!-- Token bank and buy more tokens -->
           <div class="col-6 content-center">
-            <div class="row justify-center">
+            <div class="row justify-center no-wrap">
               <q-card class="col-12 q-ma-md">
-                <q-item>
+                <q-item class="q-ma-sm">
                   <q-item-section avatar>
                     <q-avatar
                       size="100px"
@@ -44,10 +44,10 @@
                   </q-item-section>
 
                 </q-item>
-                <p class="row justify-center">You have X tokens remaining!</p>
+                <p :class="(tokenQuantity == 0 ? 'empty-bank' : '') + ' row justify-center'">You have {{ tokenQuantity }} tokens remaining!</p>
               </q-card>
             </div>
-            <div class="row justify-around">
+            <div class="row justify-around no-wrap">
               <div class="col-5">
                 <q-slider
                   v-model="creditRechargeForm.amount"
@@ -55,6 +55,7 @@
                   :max="creditRechargeForm.max"
                   switch-label-side
                   class="q-ma-sm"
+                  :step="5"
                 />
               </div>
               <div class="col-4">
@@ -68,7 +69,7 @@
                 </q-chip>
               </div>
             </div>
-            <div class="row justify-around">
+            <div class="row justify-around no-wrap">
               <div class="col-3 q-ma-md">
                 <p class="text-h4 q-ma-sm q-pt-sm">{{ rechargeCost }}</p>
               </div>
@@ -107,36 +108,6 @@
               />
             </div>
           </div>
-          <!-- <q-card
-            class="q-ma-lg col justify-center"
-            v-for="plan in Subscriptions"
-            :key="plan.name"
-          >
-            <q-img :src="plan.image" :ratio="3 / 4">
-              <div class="absolute-bottom">
-                <div class="text-h6">{{ plan.name }}</div>
-                <div
-                  class="text-subtitle2"
-                  v-for="feature in plan.features"
-                  :key="feature"
-                >
-                  {{ feature }}
-                </div>
-              </div>
-            </q-img>
-
-            <q-card-actions class="col justify-center">
-              <q-btn @click="openStripeCheckout(plan.buyUrl)">
-                <stripe-buy-button
-                  :buy-button-id="plan.buyButtonId"
-                  :publishable-key="publishableKey"
-                  :customer-email="userAuth.userEmail.value"
-                  style="pointer-events: none"
-                />
-              </q-btn>
-            </q-card-actions>
-          </q-card>
-         -->
         </div>
       </div>
     </div>
@@ -144,8 +115,8 @@
 </template>
 
 <script lang="ts">
-// import { client } from '../backend/api';
 import { userAuth } from 'boot/user-auth';
+import { tokens_api } from 'boot/tokens';
 import { ref } from 'vue';
 import RegisterUser from 'components/RegisterUser.vue';
 import LoginUser from 'components/LoginUser.vue';
@@ -157,6 +128,7 @@ export default {
     LoginUser,
   },
   async mounted() {
+    // TODO: dead code - remove? might re-implement subscriptions eventually...
     let script = document.createElement('script');
     script.src = 'https://js.stripe.com/v3/buy-button.js';
     script.async = true;
@@ -176,6 +148,7 @@ export default {
 
     const checkoutSessionId = urlParams.get('checkout-session-id');
     if (checkoutSessionId) {
+      console.log('checkoutSessionId: ', checkoutSessionId);
       const response = this.processStripeCheckout(checkoutSessionId);
       console.log(
         'checkoutSessionId: ',
@@ -190,8 +163,16 @@ export default {
     const verificationToken = urlParams.get('verification-token');
     if (verificationToken) {
       userAuth.verifyUser(verificationToken);
-      // urlParams.delete('verification-token');
-      // window.history.replaceState({}, '', '?' + urlParams.toString());
+      urlParams.delete('verification-token');
+      window.history.replaceState({}, '', '?' + urlParams.toString());
+    }
+
+    let tokenQuantity = 0;
+    if (userAuth.authenticated.value) {
+      tokens_api.getTokens().then((response) => {
+        console.log('getTokens response', response);
+        tokenQuantity = response.data.quantity;
+      });
     }
 
     return {
@@ -206,31 +187,7 @@ export default {
         amount: 100,
         costPerToken: 0.1,
       },
-      // credits: {
-      //   buyUrl: 'https://buy.stripe.com/test_14kdSBdTk0IxdlSaEG',
-      //   buyButtonId: 'buy_btn_1PEb5KA8jMGv8c7QjRnIJWLX',
-      // },
-      // Subscriptions: [
-      //   {
-      //     name: 'Standard',
-      //     priceVal: 4.99,
-      //     features: [
-      //       'Generate up to 5 reports per day',
-      //       'Save up to 10 reports',
-      //     ],
-      //     buyButtonId: 'buy_btn_1OzisbA8jMGv8c7QrDkQuYy8',
-      //     buyUrl: 'https://buy.stripe.com/test_00gaGpeXocrf81y9AA',
-      //     image: '/images/paper.jpg',
-      //   },
-      //   {
-      //     name: 'Unlimited',
-      //     priceVal: 9.99,
-      //     features: ['Generate unlimited reports', 'Save unlimited reports'],
-      //     buyButtonId: 'buy_btn_1OzjGbA8jMGv8c7QdsKmT1vD',
-      //     buyUrl: 'https://buy.stripe.com/test_4gw29T5mObnbgy46op',
-      //     image: '/images/papers.jpg',
-      //   },
-      // ],
+      tokenQuantity: tokenQuantity
     };
   },
   computed: {
@@ -287,43 +244,27 @@ export default {
         });
     },
 
-    // openStripeCheckout(url: string) {
-    //   window.location.replace(
-    //     `${url}?prefilled_email=${userAuth.userEmail.value}`
-    //   );
-    // },
-
     openStripeCheckout() {
-      console.log('recharge token checkout ...');
+      tokens_api.beginCheckout(this.creditRechargeForm.amount).then((response) => {
+        window.location.replace(response.data.stripe_url);
+      });
     },
 
-    processStripeCheckout(checkoutSessionId: string) {
-      // Create class for subs? move into userAuth?
-      return userAuth
-        .post('/subscriptions/checkout-session', {
-          session_id: checkoutSessionId,
-        })
-        .then((response) => {
-          console.log(response);
-          return response;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+    async processStripeCheckout(checkoutSessionId: string) {
+      return await tokens_api.processCheckout(checkoutSessionId).then((response) => {
+        console.log(response);
+        return response;
+      });
     },
   },
 };
 </script>
 
 <style>
-.small-print {
-  font-size: 0.8em;
-  color: grey;
-}
-
-.sub-card {
-  width: 100%;
-  max-width: 250px;
+.empty-bank {
+  color: red;
+  text-decoration: underline;
+  /* font-weight: bold; */
 }
 
 input::-webkit-outer-spin-button,

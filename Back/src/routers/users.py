@@ -15,7 +15,7 @@ from fastapi_users_db_sqlalchemy.access_token import (
     SQLAlchemyAccessTokenDatabase, SQLAlchemyBaseAccessTokenTableUUID)
 from httpx_oauth.clients.google import GoogleOAuth2
 from loguru import logger
-from sqlalchemy import Column, Date, String
+from sqlalchemy import Column, Date, String, Integer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 from src.email import send_email
@@ -36,7 +36,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     oauth_accounts: List[OAuthAccount] = relationship(
         "OAuthAccount", lazy="joined")
     reports = relationship("Report", back_populates="user", lazy="joined")
-    subscription = Column(String, nullable=True)
+    tokens = Column(Integer, default=20, nullable=False)
 
     reports_generated_today = Column(Date, nullable=True)
     last_report_date = Column(Date, nullable=True)

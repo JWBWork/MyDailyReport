@@ -7,14 +7,17 @@
     </div>
   </div>
   <q-list padding dense v-else-if="commits.length != null">
-    <commit-list-item
-      v-for="commit in commits"
-      v-bind:key="commit.sha"
-      :commit="commit"
-      @selected="commitSelected"
-    >
-      <!-- {{commit.message}} -->
-    </commit-list-item>
+    <q-scroll-area style="height: 70vh;">
+      <commit-list-item
+        v-for="commit in commits"
+        v-bind:key="commit.sha"
+        :commit="commit"
+        @selected="commitSelected"
+        style="max-width: 355px;"
+      >
+        <!-- {{commit.message}} -->
+      </commit-list-item>
+    </q-scroll-area>
   </q-list>
 </template>
 

@@ -6,6 +6,18 @@ import qs from 'qs';
 import { userAuth } from 'boot/user-auth';
 import { Report } from 'boot/reports';
 
+export class CommitAuthor {
+  public name: string;
+  public email: string;
+  public date: string;
+
+  constructor(apiCommitAuthorObject: any) {
+    this.name = apiCommitAuthorObject.name;
+    this.email = apiCommitAuthorObject.email;
+    this.date = apiCommitAuthorObject.date;
+  }
+}
+
 export class CommitFile {
   public filename: string;
   public additions: number;
@@ -36,6 +48,7 @@ export class Commit {
   public raw_url: string;
   public sha: string;
   public status: string;
+  public author: CommitAuthor;
   public files: CommitFile[];
 
   constructor(apiCommitObject: any) {
@@ -48,6 +61,7 @@ export class Commit {
     this.patch = apiCommitObject.patch;
     this.raw_url = apiCommitObject.raw_url;
     this.status = apiCommitObject.status;
+    this.author = new CommitAuthor(apiCommitObject.author);
 
     this.files = apiCommitObject.files.map((file: any) => {
       return new CommitFile(file);
@@ -166,6 +180,10 @@ export class Github implements Integration {
     if (code) {
       await this.processGithubCode(code);
       await this.getRepos();
+      urlParams.delete('code');
+      window.history.replaceState({}, '', '?' + urlParams.toString());
+      urlParams.delete('state');
+      window.history.replaceState({}, '', '?' + urlParams.toString());
     }
 
     localStorage.removeItem('awaitingAuth');
