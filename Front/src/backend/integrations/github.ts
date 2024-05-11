@@ -94,6 +94,7 @@ export class Github implements Integration {
   public icon = 'fa-brands fa-github-alt';
   public listCaption = 'Summarize your commits.';
   public authorized = false;
+  public isLive = true;
 
   public stateKey = 'githubState';
   public codeKey = 'githubCode';

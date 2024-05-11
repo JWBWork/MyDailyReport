@@ -50,7 +50,11 @@ import ReportEditor from 'components/ReportEditor.vue';
 import RepoList from 'components/RepoList.vue';
 import CommitList from 'components/CommitList.vue';
 import ReportList from 'components/ReportList.vue';
+// TODO: move to boot?
 import { Github, Commit } from '../backend/integrations/github';
+import { Slack } from '../backend/integrations/slack';
+import { Teams } from '../backend/integrations/teams';
+import { Gmail } from '../backend/integrations/gmail';
 import { ref } from 'vue';
 import { userAuth } from 'boot/user-auth';
 import { Report, reports_api } from 'boot/reports';
@@ -66,10 +70,15 @@ export default {
     ReportList,
   },
   setup() {
+    // TODO: move to to IntegrationsList.vue
     const github = new Github();
     const repos = ref(github.repos);
 
-    var integrations = [github];
+    const slack = new Slack();
+    const teams = new Teams();
+    const gmail = new Gmail();
+
+    var integrations = [github, slack, teams, gmail];
     return {
       github,
       integrations,

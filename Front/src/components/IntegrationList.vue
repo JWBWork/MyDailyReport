@@ -2,6 +2,7 @@
   <q-expansion-item
     icon="fa-brands fa-github-alt"
     label="GitHub"
+    overlay
   >
     <integration-list-item
       v-for="integration in integrations"
