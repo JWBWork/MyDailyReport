@@ -6,7 +6,8 @@ from fastapi import APIRouter, Query, Request, Depends
 from loguru import logger
 from src.summary.integrations import (
     GithubIntegration, GithubSummary,
-    GithubTokenModel, GithubUserModel
+    GithubTokenModel, GithubUserModel,
+    GithubCommitModel
 )
 from src.routers.users import User, current_active_user
 from src.routers.reports import Report
@@ -65,23 +66,16 @@ async def get_github_repos(repo_name: str, owner: str):
     )
     return response
 
-@github_router.get("/report/{owner}/{repo_name}")
+@github_router.post("/report/{owner}/{repo_name}")
 async def get_github_summary(
     request: Request, 
     owner: str, 
     repo_name: str, 
-    commit_shas: List[str] = Query(None),
-    user: User = Depends(current_active_user)
+    commits: List[GithubCommitModel],
+    # user: User = Depends(current_active_user)
 ):
-    commits = [
-        github_integration.get_repo_commit(
-            owner=owner,
-            repo_name=repo_name,
-            sha=sha,
-        ) for sha in commit_shas
-    ]
     summaries = list()
-    for i, commit in enumerate(commits):
+    for commit in commits:
         summary = github_summary.summarize_commit_files(commit)
         summaries.extend(summary)
     report_content = "\n\n\n".join(summaries)
@@ -101,8 +95,8 @@ async def get_github_summary(
             "content": report_content,
         },
         "metadata": {
-            "owner": owner,
+            # "owner": owner,
             "repo_name": repo_name,
-            "commit_shas": commit_shas,
+            # "commit_shas": commit_shas,
         }
     }

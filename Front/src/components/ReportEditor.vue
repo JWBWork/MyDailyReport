@@ -4,6 +4,7 @@
     :placeholder="placeholder"
     :readonly="readonly"
     :content-class="{'line-break': 'pre',}"
+    style="overflow-y: scroll"
   />
 </template>
 

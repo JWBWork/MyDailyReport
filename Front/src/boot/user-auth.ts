@@ -13,9 +13,10 @@ class UserAuth {
     if (this.accessToken.get()) {
       this.getUser().catch((error) => {
         console.log('UserAuth constructor error', error);
-        if (error.response.status === 401) {
-          this.browserLogout();
-        }
+        this.browserLogout();
+        // if (error.response.status === 401) {
+        //   this.browserLogout();
+        // }
       }).then((response) => {
         console.log('UserAuth constructor user', response);
         return
@@ -52,6 +53,10 @@ class UserAuth {
       console.log('user response', resp);
       return resp;
     });
+  }
+
+  public isLoggedIn() {
+    return this.authenticated.get();
   }
 
   public async RegisterUser(email: string, password: string) {

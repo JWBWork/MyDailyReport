@@ -26,6 +26,8 @@ export class CommitFile {
   public status: string;
   public raw_url: string;
   public patch: string;
+  public token_cost: number;
+  public selected = false;
 
   constructor(apiCommitFileObject: any) {
     this.filename = apiCommitFileObject.filename;
@@ -35,6 +37,7 @@ export class CommitFile {
     this.status = apiCommitFileObject.status;
     this.raw_url = apiCommitFileObject.raw_url;
     this.patch = apiCommitFileObject.patch;
+    this.token_cost = apiCommitFileObject.token_cost;
   }
 }
 
@@ -49,6 +52,7 @@ export class Commit {
   public sha: string;
   public status: string;
   public author: CommitAuthor;
+  public token_cost: number;
   public files: CommitFile[];
 
   constructor(apiCommitObject: any) {
@@ -62,6 +66,7 @@ export class Commit {
     this.raw_url = apiCommitObject.raw_url;
     this.status = apiCommitObject.status;
     this.author = new CommitAuthor(apiCommitObject.author);
+    this.token_cost = apiCommitObject.token_cost;
 
     this.files = apiCommitObject.files.map((file: any) => {
       return new CommitFile(file);
@@ -112,8 +117,6 @@ export class Github implements Integration {
     }
 
     const token = this.getToken();
-    console.log('token:', token);
-    // if (token) {
     if (token && this.validateToken(token)) {
       console.log('token is valid');
       this.authorized = true;
@@ -148,7 +151,7 @@ export class Github implements Integration {
   }
 
   validateToken(token: any) {
-    return Date.now() < token.timestamp + token.expires_in * 1000
+    return Date.now() < token.timestamp + token.expires_in * 1000;
   }
 
   async refreshToken(token: any) {
@@ -166,13 +169,13 @@ export class Github implements Integration {
         return token;
       })
       .catch((error) => {
-        this.clearToken()
+        this.clearToken();
         throw new Error(error);
       });
     console.log('token refreshed:', new_token);
   }
 
-  async grabParams() {
+  async finalizeAuth() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     // TODO: figure out what to do with state
@@ -201,12 +204,9 @@ export class Github implements Integration {
 
   async logout() {
     console.log(`logging ${this.login.value} out of github`);
-    client.post(
-      '/integrations/github/logout',
-      {
-        login: this.login.value
-      }
-    )
+    client.post('/integrations/github/logout', {
+      login: this.login.value,
+    });
     this.clearToken();
     this.authorized = false;
     this.login.value = null;
@@ -226,7 +226,7 @@ export class Github implements Integration {
         this.setToken(token);
         this.authorized = true;
         console.log(`authorized: ${this.authorized}`);
-        this.updateUserInfo()
+        this.updateUserInfo();
       })
       .catch((error) => {
         const statusCode = error.response ? error.response.status : null;
@@ -280,7 +280,7 @@ export class Github implements Integration {
       })
       .catch((error) => {
         this.authorized = false;
-        throw error
+        throw error;
       })
       .finally(() => {
         //  python's 'pass' kwyword equivalent for typescript
@@ -307,7 +307,7 @@ export class Github implements Integration {
     });
   }
 
-  async getCommits(repo: Repo): Promise<Commit[]>  {
+  async getCommits(repo: Repo): Promise<Commit[]> {
     const token = this.getToken();
     if (!token) {
       throw new Error('No token found');
@@ -329,34 +329,33 @@ export class Github implements Integration {
       return new Commit(commit);
     });
     console.log('repo.commits:', repo.commits);
-    return repo.commits
+    return repo.commits;
   }
 
-  async getReport(repo: Repo, commits: Commit[])  {
+  async getReport(repo: Repo, commits: Commit[]) {
     const token = this.getToken();
     if (!token) {
       throw new Error('No token found');
     }
-    const commit_shas = commits.map((commit) => {
-      return commit.sha;
-    });
-    console.log('requesting summary for commits:', commit_shas);
     // TODO: remove client with the user auth class? or move this to reports_api?
+    console.log('requesting summary for commits:', commits);
     return await client
-      .get(`/integrations/github/report/${this.login.value}/${repo.name}`, {
-        params: {
-          commit_shas: commit_shas,
-        },
-        headers: {
-          Authorization: `Bearer ${userAuth.accessToken.get()}`,
-        },
-        paramsSerializer: params => {
-          return qs.stringify(params, { arrayFormat: 'repeat'})
+      .post(
+        `/integrations/github/report/${this.login.value}/${repo.name}`,
+        commits,
+        {
+          headers: {
+            Authorization: `Bearer ${userAuth.accessToken.get()}`,
+          },
         }
-      })
+      )
       .then((resp) => {
         console.log('summary response:', resp);
-        return new Report(null, resp.data.report.name, resp.data.report.content);
+        return new Report(
+          null,
+          resp.data.report.name,
+          resp.data.report.content
+        );
       })
       .catch((error) => {
         // UI should respond to this error

@@ -23,31 +23,8 @@
         <div class="row no-wrap justify-center">
           <!-- Token bank and buy more tokens -->
           <div class="col-6 content-center">
-            <div class="row justify-center no-wrap">
-              <q-card class="col-12 q-ma-md">
-                <q-item class="q-ma-sm">
-                  <q-item-section avatar>
-                    <q-avatar
-                      size="100px"
-                      font-size="70px"
-                      color="primary"
-                      text-color="white"
-                      icon="savings"
-                    />
-                  </q-item-section>
-
-                  <q-item-section>
-                    <q-item-label class="text-h4">Token Bank</q-item-label>
-                    <q-item-label caption>
-                      Tokens for generating reports, tokens consumed varies for size input data
-                    </q-item-label>
-                  </q-item-section>
-
-                </q-item>
-                <p :class="(tokenQuantity == 0 ? 'empty-bank' : '') + ' row justify-center'">You have {{ tokenQuantity }} tokens remaining!</p>
-              </q-card>
-            </div>
-            <div class="row justify-around no-wrap">
+            <TokenBankCard/>
+            <div class="row justify-around no-wrap q-mt-sm">
               <div class="col-5">
                 <q-slider
                   v-model="creditRechargeForm.amount"
@@ -70,10 +47,10 @@
               </div>
             </div>
             <div class="row justify-around no-wrap">
-              <div class="col-3 q-ma-md">
+              <div class="col-3 q-my-sm q-ml-xl">
                 <p class="text-h4 q-ma-sm q-pt-sm">{{ rechargeCost }}</p>
               </div>
-              <div class="col-7 q-ma-md">
+              <div class="col-6 q-my-sm q-mr-md">
                 <q-btn
                   @click="openStripeCheckout"
                   color="primary"
@@ -120,12 +97,14 @@ import { tokens_api } from 'boot/tokens';
 import { ref } from 'vue';
 import RegisterUser from 'components/RegisterUser.vue';
 import LoginUser from 'components/LoginUser.vue';
+import TokenBankCard from 'components/TokenBankCard.vue';
 
 export default {
   name: 'UserPage',
   components: {
     RegisterUser,
     LoginUser,
+    TokenBankCard
   },
   async mounted() {
     // TODO: dead code - remove? might re-implement subscriptions eventually...
@@ -144,6 +123,21 @@ export default {
     };
   },
   data() {
+    return {
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      tab: 'login',
+      email: '',
+      password: '',
+      creditRechargeForm: {
+        min: 25,
+        max: 500,
+        amount: 100,
+        costPerToken: 0.1,
+      },
+      // tokenQuantity: 0
+    };
+  },
+  async created() {
     const urlParams = new URLSearchParams(window.location.search);
 
     const checkoutSessionId = urlParams.get('checkout-session-id');
@@ -167,28 +161,13 @@ export default {
       window.history.replaceState({}, '', '?' + urlParams.toString());
     }
 
-    let tokenQuantity = 0;
-    if (userAuth.authenticated.value) {
-      tokens_api.getTokens().then((response) => {
-        console.log('getTokens response', response);
-        tokenQuantity = response.data.quantity;
-      });
-    }
-
-    return {
-      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
-      checkoutSessionId: checkoutSessionId,
-      tab: 'login',
-      email: '',
-      password: '',
-      creditRechargeForm: {
-        min: 25,
-        max: 500,
-        amount: 100,
-        costPerToken: 0.1,
-      },
-      tokenQuantity: tokenQuantity
-    };
+    // console.log('UserPage created');
+    // if (userAuth.authenticated.value) {
+    //   tokens_api.getTokens().then((response) => {
+    //     console.log('getTokens response', response);
+    //     this.tokenQuantity = response.data.tokens;
+    //   });
+    // }
   },
   computed: {
     authenticated() {

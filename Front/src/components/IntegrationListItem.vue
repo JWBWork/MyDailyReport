@@ -43,7 +43,8 @@ export default defineComponent({
   setup(props) {
     // console.log(props.integration)
     if (localStorage.getItem('awaitingAuth') == props.integration.name) {
-      props.integration.grabParams();
+      // props.integration.grabParams();
+      props.integration.finalizeAuth();
     }
 
     return {

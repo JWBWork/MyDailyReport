@@ -7,17 +7,15 @@
     </div>
   </div>
   <q-list padding dense v-else-if="commits.length != null">
-    <q-scroll-area style="height: 70vh;">
+    <div class="commit-list">
       <commit-list-item
         v-for="commit in commits"
         v-bind:key="commit.sha"
         :commit="commit"
         @selected="commitSelected"
-        style="max-width: 355px;"
-      >
-        <!-- {{commit.message}} -->
-      </commit-list-item>
-    </q-scroll-area>
+        style="max-width: 100%;overflow: hidden;"
+      />
+    </div>
   </q-list>
 </template>
 
@@ -88,3 +86,15 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+.commit-list {
+  /* height: 75vh !important; */
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.commit-list::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+</style>

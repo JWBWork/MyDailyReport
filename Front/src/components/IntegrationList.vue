@@ -1,8 +1,8 @@
 <template>
+  <!-- TODO: should have a default "select integration and login" thing -->
   <q-expansion-item
     icon="fa-brands fa-github-alt"
     label="GitHub"
-    overlay
   >
     <integration-list-item
       v-for="integration in integrations"

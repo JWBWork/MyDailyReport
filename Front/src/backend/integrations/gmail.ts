@@ -11,6 +11,10 @@ export class Gmail implements Integration {
     console.log('Gmail.initAuth()');
   }
 
+  public finalizeAuth() {
+    console.log('Gmail.finalizeAuth()');
+  }
+
   public logout() {
     console.log('Gmail.logout()');
   }

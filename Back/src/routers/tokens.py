@@ -57,7 +57,7 @@ async def process_checkout(
 ):
     checkout_session = stripe.checkout.Session.retrieve(checkout_session.session_id)
     line_items = checkout_session.list_line_items()
-    quantity = line_items[0].quantity
+    quantity = line_items.data[0].quantity
     if checkout_session.payment_status == "paid":
         user.tokens += quantity
         session.add(user)

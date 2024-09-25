@@ -1,42 +1,52 @@
 <template>
-  <q-page>
-    <div class="row justify-center">
-      <div class="col-3 q-py-sm" style="height: 85vh;">
-        <integration-list :integrations="integrations" />
-
-        <!-- TODO: apply date range for query  -->
-        <!-- <report-calendar /> -->
-
-        <!-- TODO: Some intermediate element to select integration specific elements -->
-        <div v-show="githubAuthorized" class="col full-height">
-          <!-- <div class="col"> -->
-            <repo-list :github="github" :repos="repos" ref="repoSelect" />
-            <commit-list
-              :github="github"
-              :repo="selectedRepo"
-              v-show="selectedRepo != null"
-              @updatedCommitSelection="selectedCommits"
-              ref="commitList"
-            />
-            <q-btn
-              icon="history_edu"
-              :loading="awaiting_summary"
-              label="Summarize"
-              class="full-width"
-              @click="requestSummary()"
-              :disabled="!commitsSelected || awaiting_summary"
-            />
-          </div>
-        <!-- </div> -->
-      </div>
-      <div class="col-5 q-ma-sm" style="height: 85vh;">
-        <div class="row">
-          <ReportList ref="reportList" @saveReport="saveReport" @selectReport="selectReport"/>
+  <q-page class="col full-height row justify-center">
+    <div class="col-3 q-py-sm">
+      <div class="column justify-between full-height">
+        <div class="col-auto">
+          <TokenBankCard class="q-ma-sm" />
+          <integration-list :integrations="integrations" class="q-mb-sm" />
+          <!-- TODO: apply date range for query  -->
+          <!-- <report-calendar /> -->
+          <repo-list v-show="githubAuthorized" :github="github" :repos="repos" ref="repoSelect" />
         </div>
+        <div
+          class="col"
+          style="overflow-y: scroll; max-width: 100%; max-height: 50vh"
+        >
+          <commit-list
+            :github="github"
+            :repo="selectedRepo"
+            v-show="selectedRepo != null"
+            @updatedCommitSelection="selectedCommits"
+            ref="commitList"
+          />
+        </div>
+        <div class="col-1 self-center full-width">
+          <q-btn
+            icon="history_edu"
+            :loading="awaiting_summary"
+            label="Summarize"
+            class="full-width"
+            @click="requestSummary()"
+            :disabled="!commitsSelected || awaiting_summary"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-5 q-ma-sm full-height">
+      <div class="col-1">
+        <ReportList
+          ref="reportList"
+          @saveReport="saveReport"
+          @selectReport="selectReport"
+        />
+      </div>
+      <div class="col-8" style="overflow: scroll">
         <report-editor
           class="full-height"
           ref="reportEditor"
           :readonly="awaiting_summary"
+          height="80vh"
         />
       </div>
     </div>
@@ -58,6 +68,7 @@ import { Gmail } from '../backend/integrations/gmail';
 import { ref } from 'vue';
 import { userAuth } from 'boot/user-auth';
 import { Report, reports_api } from 'boot/reports';
+import TokenBankCard from 'components/TokenBankCard.vue';
 
 export default {
   name: 'IndexPage',
@@ -68,6 +79,7 @@ export default {
     RepoList,
     CommitList,
     ReportList,
+    TokenBankCard,
   },
   setup() {
     // TODO: move to to IntegrationsList.vue
@@ -177,7 +189,7 @@ export default {
     },
     updateEditorContent(content: string) {
       const editor_element = this.$refs.reportEditor as any;
-      editor_element.content = content.replace(/(?:\r\n|\r|\n)/g, '<br>');;
+      editor_element.content = content.replace(/(?:\r\n|\r|\n)/g, '<br>');
       editor_element.$forceUpdate();
     },
   },

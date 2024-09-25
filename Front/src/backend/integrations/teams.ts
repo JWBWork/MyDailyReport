@@ -11,6 +11,10 @@ export class Teams implements Integration {
     console.log('Teams.initAuth()');
   }
 
+  public finalizeAuth() {
+    console.log('Teams.finalizeAuth()');
+  }
+
   public logout() {
     console.log('Teams.logout()');
   }

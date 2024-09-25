@@ -11,6 +11,10 @@ export class Slack implements Integration {
     console.log('Slack.initAuth()');
   }
 
+  public finalizeAuth() {
+    console.log('Slack.finalizeAuth()');
+  }
+
   public logout() {
     console.log('Slack.logout()');
   }

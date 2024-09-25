@@ -1,8 +1,11 @@
-from pathlib import Path
+import os
 from dataclasses import dataclass
-import openai
 from datetime import datetime
+from pathlib import Path
+
+import openai
 from loguru import logger
+
 
 # @dataclass
 class Summary:
@@ -30,7 +33,7 @@ class Summary:
             prompt_history_file.write(prompt)
 
         r = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=os.environ['MODEL_NAME'],
             messages=[{"role": "user", "content": prompt}]
         )
 

@@ -75,25 +75,16 @@ export default {
       this.$emit('saveReport', this.selected_report.name)
     },
     async refreshReports() {
-      try {
+      if (userAuth.isLoggedIn()) {
         var reports: Report[] = await reports_api.getReports();
         this.reports = reports;
         this.authorized = true;
-        return reports;
-      } catch (e: any) {
-        if (e.response && e.response.status === 401) {
-          console.error('failed to get reports', e);
-          userAuth.LogoutUser()
-          this.authorized = false;
-        } else{
-          throw e;
-        }
+      } else {
+        this.authorized = false;
+        var reports: Report[] = [];
       }
+      return reports;
     },
-
-
-
-
     async goToLogin() {
       this.$router.push({path: '/user'});
     },
